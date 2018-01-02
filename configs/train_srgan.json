@@ -1,0 +1,63 @@
+{
+  "seed": 0,
+  "run_name": "srgan-scale_4",
+
+  "train_dataset": "COCO",
+  "validation_dataset": "BSDS500",
+  "train_crop_size": 96,
+  "test_crop_size": 96,
+  "scale_to_orig": false,
+  "upscale_factor": 4.0,
+  "interpolation": "bicubic",
+
+  "application": "super_resolution",
+  "runner_type": "adversarial",
+
+  "generator_model": {
+    "#include": "srresnet.json"
+  },
+
+  "discriminator_model": {
+    "#include": "srgan_discriminator.json",
+    "spatial_shape": [96, 96]
+  },
+
+  "generator_adversarial_losses": ["gan"],
+  "generator_losses": ["VGG19"],
+  "generator_loss_weights": {
+	  "gan": 0.001,
+	  "VGG19": 0.28
+  },
+  "discriminator_losses": ["gan"],
+
+  "generator_optimizer": {
+    "name": "Adam",
+    "learning_rate": 0.0001,
+    "lr_scheduler": "multistep",
+    "decay_steps": [13],
+    "decay_factor": 0.1
+  },
+
+  "discriminator_optimizer": {
+    "name": "Adam",
+    "learning_rate": 0.0001,
+    "lr_scheduler": "multistep",
+    "decay_steps": [13],
+    "decay_factor": 0.1
+  },
+
+  "num_epochs": 28,
+  "batch_size": 16,
+  "epochs_per_validation": 1,
+  "epochs_per_checkpoint": 1,
+  "steps_per_train_summary": 100,
+  "num_periodic_checkpoints": 3,
+  "num_data_workers": 8,
+
+  "train_generator_metrics": ["psnr"],
+  "train_discriminator_metrics": ["binary_accuracy"],
+  "validation_metrics": ["psnr", "ssim"],
+
+  "use_tensorboard": true,
+  "num_image_summaries": 8
+}

@@ -1,0 +1,13 @@
+{
+  "name": "CNNDiscriminator",
+  "num_inputs": 3,
+  "num_filters_per_layer": [64, 64, 128, 128, 256, 256, 512, 512],
+  "strides": [1, 2, 1, 2, 1, 2, 1, 2],
+  "kernel_sizes": 3,
+  "fc_layers": [1024, 1],
+  "act_fn": "lrelu",
+  "relu_leakiness": 0.2,
+  "use_norm_layers": "not-first",
+  "norm_layer": "batch",
+  "padding": "reflection"
+}

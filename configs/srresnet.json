@@ -1,0 +1,13 @@
+{
+  "name": "SRResNet",
+  "upscale_factor": 4.0,
+  "num_inputs": 3,
+  "num_outputs": 3,
+  "output_activation": "none",
+  "num_res_blocks": 16,
+  "relu_leakiness": 0.0,
+  "weight_init": {
+    "conv_weight": ["orthogonal", "relu"]
+  },
+  "padding": "reflection"
+}

@@ -1,0 +1,41 @@
+{
+  "seed": 0,
+  "run_name": "srresnet-scale_4",
+
+  "train_dataset": "COCO",
+  "validation_dataset": "BSDS500",
+  "train_crop_size": 96,
+  "test_crop_size": 96,
+  "scale_to_orig": false,
+  "upscale_factor": 4.0,
+  "interpolation": "bicubic",
+
+  "application": "super_resolution",
+  "runner_type": "standard",
+
+  "model": {
+	"#include": "srresnet.json"
+  },
+
+  "loss_name": "MSE",
+
+  "optimizer": {
+    "name": "Adam",
+    "learning_rate": 0.0001
+  },
+
+  "num_epochs": 140,
+  "batch_size": 16,
+  "epochs_per_validation": 1,
+  "epochs_per_checkpoint": 1,
+  "steps_per_train_summary": 100,
+  "num_periodic_checkpoints": 1,
+  "num_data_workers": 8,
+
+  "train_metrics": ["psnr"],
+  "validation_metrics": ["psnr", "ssim"],
+  "validation_checkpoint_metrics": ["loss_MSE"],
+
+  "use_tensorboard": true,
+  "num_image_summaries": 8
+}
