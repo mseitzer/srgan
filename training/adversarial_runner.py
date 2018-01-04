@@ -156,9 +156,6 @@ class AdversarialRunner(BaseRunner):
     self.val_metric_transform = val_metric_transform
     self.output_transform = output_transform
 
-    self.gen_updates_per_step = gen_updates_per_step
-    self.disc_updates_per_step = disc_updates_per_step
-
     self.disc_input_fn = _get_disc_input_fn(disc_input_method)
 
     self.gen_adv_criteria = OrderedDict(gen_adv_criteria)

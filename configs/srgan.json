@@ -14,7 +14,8 @@
   "runner_type": "adversarial",
 
   "generator_model": {
-    "#include": "resnet.json"
+    "#include": "resnet.json",
+	"pretrained_weights": ["../resources/pretrained/srresnet.pth", "model"]
   },
 
   "discriminator_model": {
