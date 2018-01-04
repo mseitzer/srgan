@@ -285,7 +285,7 @@ class AdversarialRunner(BaseRunner):
 
     return 1, loss_metrics, (inp, out_gen, target, out_disc_fake)
 
-   def _val_step(self, loader):
+  def _val_step(self, loader, compute_metrics=True):
     batch = self._request_data(loader, volatile=True)
     if batch is None:
       return None, None
@@ -294,11 +294,12 @@ class AdversarialRunner(BaseRunner):
     prediction = self.gen(inp)
 
     loss_metrics = {}
-    # Only compute the standard losses here, adversarial losses don't make
-    # to much sense
-    for name, criterion in self.gen_criteria.items():
-      loss = criterion(prediction, target)
-      loss_metrics['gen_loss_' + name] = get_loss_metric(loss.data[0])
+    if compute_metrics:
+      # Only compute the standard losses here, adversarial losses don't make
+      # to much sense
+      for name, criterion in self.gen_criteria.items():
+        loss = criterion(prediction, target)
+        loss_metrics['gen_loss_' + name] = get_loss_metric(loss.data[0])
 
     return loss_metrics, (inp, prediction, target, None)
 

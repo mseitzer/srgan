@@ -118,6 +118,21 @@ class BaseRunner(object):
 
     return epoch_data, value_by_loss, value_by_metric
 
+  def infer(self, loader):
+    epoch_data = []
+    self._set_test()
+
+    self.data_iter = iter(loader)
+
+    for current_batch in range(len(loader)):
+      _, data = self._val_step(loader, compute_metrics=False)
+      if data is None:
+        break
+
+      epoch_data.append(utils.cpuify(data))
+
+    return epoch_data
+
   @staticmethod
   def initialize_pretrained_model(model_conf, model, cuda, conf_path):
     path, model_key = model_conf.pretrained_weights
@@ -145,7 +160,7 @@ class BaseRunner(object):
   def _train_step(self, loader):
     raise NotImplementedError('Subclasses must override _train_steps')
 
-  def _val_step(self, loader):
+  def _val_step(self, loader, compute_metrics):
     raise NotImplementedError('Subclasses must override _val_step')
 
   def _compute_train_metrics(self, data):

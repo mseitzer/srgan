@@ -27,16 +27,21 @@ def _load_image(path, convert_to_grayscale=False, convert_to_luma=False):
 class SRDatasetFromImagePaths(Dataset):
   """Loader for super resolution where the input is used as target"""
   def __init__(self, images, input_images=None, grayscale=False,
-               luma=False, transform=None, name=None):
+               luma=False, transform=None, name=None, no_target=False,
+               upscale_factor=None):
     super(SRDatasetFromImagePaths, self).__init__()
     assert input_images is None or len(images) == len(input_images), \
         'Number of input images need to match number of images'
+    if no_target:
+       assert upscale_factor is not None
     self.name = name
     self.images = images
     self.input_images = input_images
     self.grayscale = grayscale
     self.luma = luma
     self.transform = transform
+    self.no_target = no_target
+    self.upscale_factor = upscale_factor
 
   def __getitem__(self, index):
     image = _load_image(self.images[index],
@@ -49,7 +54,14 @@ class SRDatasetFromImagePaths(Dataset):
     else:
       inp = image.copy()
 
-    target = image
+    if not self.no_target:
+      target = image
+    else:
+      # For purely super-resolving images, there is no target image.
+      # As our pipeline requires one, we generate one with a fitting size
+      size = (int(inp.size[0] * self.upscale_factor),
+              int(inp.size[1] * self.upscale_factor))
+      target = Image.new(inp.mode, size)
 
     if self.transform:
       inp, target = self.transform(inp, target)
@@ -60,7 +72,8 @@ class SRDatasetFromImagePaths(Dataset):
     return len(self.images)
 
 
-def make_sr_dataset_from_folder(conf, file_or_dir, transform, name=None):
+def make_sr_dataset_from_folder(conf, file_or_dir, transform,
+                                inference=False, name=None):
   if os.path.isdir(file_or_dir):
     images = [os.path.join(file_or_dir, filename)
               for filename in sorted(os.listdir(file_or_dir))
@@ -82,4 +95,6 @@ def make_sr_dataset_from_folder(conf, file_or_dir, transform, name=None):
                                                          default=False),
                                  luma=conf.get_attr('luma', default=False),
                                  transform=transform,
-                                 name=name)
+                                 name=name,
+                                 no_target=inference,
+                                 upscale_factor=conf.upscale_factor)

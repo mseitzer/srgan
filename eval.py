@@ -82,6 +82,7 @@ def main(argv):
   conf.full_image = True
 
   # Load datasets
+  mode = 'dataset'
   if len(args.files_or_dirs) == 0:
     datasets = [load_dataset(conf, args.data_dir, conf.validation_dataset, args.fold)]
   else:
@@ -91,9 +92,10 @@ def main(argv):
         dataset = load_dataset(conf, args.data_dir, f, args.fold)
         datasets.append(dataset)
       else:
-        # For now, hardcode to SR case
-        transform = get_sr_transform(conf, 'test')
-        datasets = [make_sr_dataset_from_folder(conf, f, transform)
+        mode = 'image'
+        transform = get_sr_transform(conf, 'test', downscale=False)
+        datasets = [make_sr_dataset_from_folder(conf, f, transform,
+                                                inference=True)
                     for f in args.files_or_dirs]
 
   num_workers = conf.get_attr('num_data_workers', default=DEFAULT_NUM_WORKERS)
@@ -104,19 +106,27 @@ def main(argv):
                         num_workers=num_workers,
                         batch_size=1,
                         shuffle=False)
-    data, _, val_metrics = runner.validate(loader, len(loader))
 
-    print('Average metrics for {}'.format(dataset.name))
-    for metric_name, metric in val_metrics.items():
-      print('     {}: {}'.format(metric_name, metric))
+    if mode == 'dataset':
+      data, _, val_metrics = runner.validate(loader, len(loader))
+
+      print('Average metrics for {}'.format(dataset.name))
+      for metric_name, metric in val_metrics.items():
+        print('     {}: {}'.format(metric_name, metric))
+    else:
+      data = runner.infer(loader)
 
     if args.infer or args.dump:
-      output_dir = get_run_dir(args.out_dir, dataset.name)
-      if not os.path.isdir(output_dir):
-        os.mkdir(output_dir)
+      if mode == 'dataset':
+        output_dir = get_run_dir(args.out_dir, dataset.name)
+        if not os.path.isdir(output_dir):
+          os.mkdir(output_dir)
 
       file_idx = 0
       for batch in data:
+        if mode == 'image':
+          output_dir = os.path.dirname(dataset.images[file_idx])
+
         named_batch = runner.get_named_outputs(batch)
         inputs = named_batch['input']
         predictions = named_batch['prediction']

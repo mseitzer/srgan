@@ -2,9 +2,7 @@ import importlib
 
 MODEL_MODULES = {
     'bilinear': 'models.bilinear',
-    'UNET': 'models.unet',
     'SRResNet': 'models.srresnet',
-    'NonLocalSRResNet': 'models.srresnet',
     'CNNDiscriminator': 'models.discriminators'
 }
 

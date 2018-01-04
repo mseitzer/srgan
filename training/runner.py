@@ -153,7 +153,7 @@ class Runner(BaseRunner):
     data = (inp, prediction, target)
     return 1, loss_metrics, data
 
-  def _val_step(self, loader):
+  def _val_step(self, loader, compute_metrics=True):
     batch = self._request_data(loader, volatile=True)
     if batch is None:
       return None, None
@@ -162,9 +162,10 @@ class Runner(BaseRunner):
     prediction = self.model(inp)
 
     loss_metrics = {}
-    for name, criterion in self.criteria.items():
-      loss = criterion(prediction, target)
-      loss_metrics['loss_' + name] = get_loss_metric(loss.data[0])
+    if compute_metrics:
+      for name, criterion in self.criteria.items():
+        loss = criterion(prediction, target)
+        loss_metrics['loss_' + name] = get_loss_metric(loss.data[0])
 
     return loss_metrics, (inp, prediction, target)
 
