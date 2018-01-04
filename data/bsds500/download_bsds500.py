@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""Download and setup the BSDS500 dataset
+
+The images come from Arbelaez, Maire, Fowlkes & J. Malik:
+Contour Detection and Hierarchical Image Segmentation (2011)
+(see https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/
+grouping/resources.html)
+Note that the BSDS500 validation set contains the same images as in the
+BSDS100 dataset.
+"""
 import argparse
 import os
 import shutil
@@ -42,7 +51,7 @@ def download_and_extract_bsds500(dest_path, from_tar_file=None):
 
   print('Extracting data')
   with tarfile.open(tar_file) as tar:
-    for item in (item for item in tar if 'images' in item.name):
+    for item in (item for item in tar if 'BSDS500/data/images' in item.name):
       item.name = os.path.relpath(item.name, 'BSR/BSDS500/data')
       tar.extract(item, dest_path)
 
