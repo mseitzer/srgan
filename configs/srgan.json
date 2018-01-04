@@ -14,7 +14,7 @@
   "runner_type": "adversarial",
 
   "generator_model": {
-    "#include": "srresnet.json"
+    "#include": "resnet.json"
   },
 
   "discriminator_model": {
