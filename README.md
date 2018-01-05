@@ -57,11 +57,9 @@ All given results are taken at 4x scale.
 ### Quantitative results
 
 PSNR and SSIM scores of this implementation compared against the values reported in the paper. 
-This implementation reaches slightly lower scores than the reference, which might be because of the 
-larger training set Ledig et al used (350k ImageNet images vs. 118k COCO images).
 
 | Dataset | Bicubic        | SRResnet (Ledig et al) | SRResNet (ours) |
 | ------- | -------------- | ---------------------- | --------------- |
 | Set5    | 28.43 / 0.8211 | 32.05 / 0.9019         | 31.94 / 0.8959  |
-| Set14   | 25.99 / 0.7486 | 28.49 / 0.8184         | 27.75 / 0.7690  |
+| Set14   | 25.99 / 0.7486 | 28.49 / 0.8184         | 28.55 / 0.7881  |
 | BSDS100 | 25.94 / 0.6935 | 27.58 / 0.7620         | 27.55 / 0.7445  |

@@ -26,13 +26,40 @@ def _maybe_pad_image_to_size(image, target_size):
 
 
 def _maybe_pad_to_target_size(prediction, target, mode='reflect'):
-  def get_padding(pred_size, target_size):
+  def get_padding(pred_size, target_size, fixed_bottom_padding=1):
+    """Computes padding needed to pad image from one size to another
+
+    Padding gets equally distributed on both sides, with the right/bottom side
+    having one more pixel if the needed padding is uneven. Additionally, the
+    method supports always giving the right/bottom side a fixed amount of
+    padding from the total padding (e.g. get_padding(pred_size=1, target_size=5,
+    fixed_bottom_padding=1) = (1, 3)). This is needed to exactly align output
+    images where the target image's size is not divisible by the scaling factor.
+
+    Parameters
+    ----------
+    pred_size : int
+      Size of the image in x or y direction
+    target_size : int
+      Size the image has after padding in x or y direction
+    fixed_bottom_padding : int
+      Number of pixels always added to right or bottom side from the total
+      number of padded pixels
+
+    Returns
+    -------
+    Tuple (a, b), where a is the padding to be applied on the left/top side, and
+    b is the padding to be applied on the right/bottom side
+    """
     total_padding = target_size - pred_size
+    if total_padding == 0:
+      return 0, 0
+    total_padding -= fixed_bottom_padding
     padding = total_padding // 2
     if total_padding % 2 == 0:
-      return padding, padding
+      return padding, padding + fixed_bottom_padding
     else:
-      return padding, padding + 1
+      return padding, padding + fixed_bottom_padding + 1
 
   pred_size = prediction.size()
   target_size = target.size()
