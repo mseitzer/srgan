@@ -6,7 +6,9 @@ This paper's main result is that through using an adversarial and a content loss
 
 The implementation tries to be as faithful as possible to the original paper.
 See [implementation details](#method-and-implementation-details) for a closer look. 
-So far, a SRResNet pretrained on the COCO dataset (118k images) is provided. A pretrained SRGAN will follow shortly.
+Pretrained checkpoints of SRResNet and SRGAN trained on the COCO dataset (118k images) are provided.
+
+![Example 4x upscaling](images/comparison.png)
 
 ## Setup and Usage
 
@@ -24,6 +26,7 @@ Warning: the dataset is 18GB in size and will take some time to download!
 
 ```
 ./eval.py -i configs/srresnet.json resources/pretrained/srresnet.pth path/to/image.jpg
+./eval.py -i configs/srgan.json resources/pretrained/srgan.pth path/to/image.jpg
 ```
 The super-resolved image will be saved to the same folder as the input image and named `image_pred.jpg`.
 
@@ -34,6 +37,7 @@ Note that the script uses GPU 0 by default. To use the CPU, pass `-c ''` as an a
 To reproduce the [score evaluations](#quantitative-results) of the benchmark datasets:
 ```
 ./eval.py configs/srresnet.json resources/pretrained/srresnet.pth Set5 Set14 BSDS500
+./eval.py configs/srgan.json resources/pretrained/srgan.pth Set5 Set14 BSDS500
 ```
 To also get the super-resolved images of the benchmark dataset, you can pass the infer flag `-i` to the script.
 
@@ -65,13 +69,14 @@ Some further configuration values you can tweak:
 ## Method and Implementation Details
 
 Architecture diagram of the super-resolution and discriminator networks by Ledig et al:
+
 ![SRGAN architecture](images/architecture.png)
 
 The implementation tries to stay as close as possible to the details given in the paper. 
 As such, the pretrained SRResNet and SRGAN are also trained with 1e6 and 1e5 update steps. 
 The high amount of update steps proved to be essential for performance, which pretty much monotonically increases with training time.
 
-The only real difference is that Ledig et al train on ImageNet (350k images), and this implementation was trained on MS COCO (118k images). In practice, this implementation reach around the same performance as reported in the paper. 
+The only real difference is that Ledig et al train on ImageNet (350k images), and this implementation was trained on MS COCO (118k images). In practice, this implementation reaches around the same performance as reported in the paper. 
 
 Some further implementation choices where the paper does not give any details:
 - Initialization: orthogonal for the super-resolution network, randomly from a normal distribution with std=0.02 for the discriminator network
@@ -84,9 +89,11 @@ All given results are taken at 4x scale.
 ### Quantitative results
 
 PSNR and SSIM scores of this implementation compared against the values reported in the paper. 
+The values of our SRResNet match pretty closely to the reported values, whereas our SRGAN falls of a bit. 
+This could be because of many things, as GAN training is rather unstable and can vary a lot even based on just random initialization.
 
-| Dataset | Bicubic        | SRResnet (Ledig et al) | SRResNet (ours) |
-| ------- | -------------- | ---------------------- | --------------- |
-| Set5    | 28.43 / 0.8211 | 32.05 / 0.9019         | 31.94 / 0.8959  |
-| Set14   | 25.99 / 0.7486 | 28.49 / 0.8184         | 28.55 / 0.7881  |
-| BSDS100 | 25.94 / 0.6935 | 27.58 / 0.7620         | 27.55 / 0.7445  |
+| Dataset | Bicubic        | SRResnet (Ledig et al) | SRResNet (ours) | SRGAN (Ledig et al) | SRGAN (ours)   |
+| ------- | -------------- | ---------------------- | --------------- | ------------------- | -------------- |
+| Set5    | 28.43 / 0.8211 | 32.05 / 0.9019         | 31.94 / 0.8959  | 29.40 / 0.8472      | 28.78 / 0.8343 |
+| Set14   | 25.99 / 0.7486 | 28.49 / 0.8184         | 28.55 / 0.7881  | 26.02 / 0.7397      | 25.53 / 0.6856 |
+| BSDS100 | 25.94 / 0.6935 | 27.58 / 0.7620         | 27.55 / 0.7445  | 25.16 / 0.6688      | 24.17 / 0.6236 |
