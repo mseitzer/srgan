@@ -4,9 +4,12 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
+IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.tif', '.tiff')
+
+
 def _is_image_file(filename):
   _, ext = os.path.splitext(filename)
-  return ext.lower() in ('.jpg', '.jpeg', '.png')
+  return ext.lower() in IMAGE_EXTENSIONS
 
 
 def _load_image(path, convert_to_grayscale=False, convert_to_luma=False):
