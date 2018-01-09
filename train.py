@@ -189,6 +189,9 @@ def train_net(conf, runner, train_loader, val_loader, cuda,
     start_epoch = 1
     best_val_metrics = {}
   else:
+    assert 'start_epoch' in restore_state \
+        and 'best_val_metrics' in restore_state, \
+        'Invalid checkpoint for resuming training. Inference checkpoint?'
     start_epoch = restore_state['start_epoch']
     best_val_metrics = restore_state['best_val_metrics']
 
@@ -247,7 +250,8 @@ def main(argv):
   utils.set_random_seeds(conf.seed)
 
   # Setup model
-  runner = build_runner(conf, conf.runner_type, args.cuda, mode='train')
+  runner = build_runner(conf, conf.runner_type, args.cuda, mode='train',
+                        resume=args.resume is not None)
 
   if args.print_model:
     print(str(runner))

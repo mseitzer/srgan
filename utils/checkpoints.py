@@ -2,8 +2,6 @@ import os
 
 import torch
 
-from utils.checkpoint_paths import is_checkpoint_path
-
 
 def save_checkpoint(log_file_path, conf, runner, epoch, best_val_metrics):
   state = {
@@ -21,21 +19,43 @@ def restore_checkpoint(checkpoint_path, runner, cuda=None):
 
   checkpoint = torch.load(checkpoint_path, map_location=map_location)
 
-  if 'runner' in checkpoint:
-    runner.load_state_dict(checkpoint['runner'])
-  else:
-    # Backwards compatibility
-    runner.load_state_dict({'model': checkpoint['model'],
-                            'optimizer': checkpoint['optimizer']})
+  runner.load_state_dict(checkpoint['runner'])
 
-  return {
+  state = {
       'conf': checkpoint['conf'],
-      'start_epoch': checkpoint['epoch'],
-      'best_val_metrics': checkpoint['best_val_metrics']
   }
+
+  if 'epoch' in checkpoint:
+    state['start_epoch'] = checkpoint['epoch']
+  if 'best_val_metrics' in checkpoint:
+    state['best_val_metrics'] = checkpoint['best_val_metrics']
+
+  return state
+
+
+def inference_checkpoint_from_training_checkpoint(checkpoint, runner_type):
+  inference_net_by_runner_type = {
+      'standard': 'model',
+      'adversarial': 'generator',
+  }
+  assert runner_type in inference_net_by_runner_type, \
+      'Unknown runner_type {}'.format(runner_type)
+
+  inference_net = inference_net_by_runner_type[runner_type]
+  assert inference_net in checkpoint['runner'], \
+      'Checkpoint does not support runner_type {}'.format(runner_type)
+
+  state = {
+      'conf': checkpoint['conf'],
+      'runner': {}
+  }
+
+  state['runner'][inference_net] = checkpoint['runner'][inference_net]
+  return state
 
 
 def prune_checkpoints(run_dir, num_checkpoints_to_retain=1):
+  from utils.checkpoint_paths import is_checkpoint_path
   checkpoints = [f for f in os.listdir(run_dir) if is_checkpoint_path(f)]
   num_checkpoints = len(checkpoints)
   if num_checkpoints > num_checkpoints_to_retain:

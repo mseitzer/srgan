@@ -17,7 +17,7 @@ from utils.config import Configuration
 DEFAULT_INPUT_METHOD = 'simple'
 
 
-def build_runner(conf, cuda, mode):
+def build_runner(conf, cuda, mode, resume=False):
   gen_model_conf = Configuration.from_dict(conf.generator_model)
   gen_model = construct_model(gen_model_conf, gen_model_conf.name)
 
@@ -93,11 +93,11 @@ def build_runner(conf, cuda, mode):
                                val_metric_transform,
                                output_transform,
                                input_method)
-    if gen_model_conf.has_attr('pretrained_weights'):
+    if gen_model_conf.has_attr('pretrained_weights') and not resume:
       runner.initialize_pretrained_model(gen_model_conf, runner.gen,
                                          cuda, conf.file)
 
-    if disc_model_conf.has_attr('pretrained_weights'):
+    if disc_model_conf.has_attr('pretrained_weights') and not resume:
       runner.initialize_pretrained_model(disc_model_conf, runner.disc,
                                          cuda, conf.file)
   else:
@@ -192,12 +192,15 @@ class AdversarialRunner(BaseRunner):
     self.gen.load_state_dict(state_dict['generator'])
 
     if self.disc is not None:
+      assert 'discriminator' in state_dict, 'Incompatible checkpoint'
       self.disc.load_state_dict(state_dict['discriminator'])
 
     if self.gen_optimizer is not None:
+      assert 'gen_optimizer' in state_dict, 'Incompatible checkpoint'
       self.gen_optimizer.load_state_dict(state_dict['gen_optimizer'])
 
     if self.disc_optimizer is not None:
+      assert 'disc_optimizer' in state_dict, 'Incompatible checkpoint'
       self.disc_optimizer.load_state_dict(state_dict['disc_optimizer'])
 
   def __str__(self):

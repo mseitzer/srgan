@@ -13,7 +13,7 @@ from training.base_runner import BaseRunner
 from utils.config import Configuration
 
 
-def build_runner(conf, cuda, mode='train'):
+def build_runner(conf, cuda, mode='train', resume=False):
   model_conf = Configuration.from_dict(conf.model)
 
   model = construct_model(model_conf, model_conf.name)
@@ -57,7 +57,7 @@ def build_runner(conf, cuda, mode='train'):
                     train_metric_fns, train_metric_transform,
                     val_metric_fns, val_metric_transform, output_transform)
 
-    if model_conf.has_attr('pretrained_weights'):
+    if model_conf.has_attr('pretrained_weights') and not resume:
       runner.initialize_pretrained_model(model_conf, runner.model, cuda,
                                          conf.file)
   else:
@@ -111,6 +111,7 @@ class Runner(BaseRunner):
   def load_state_dict(self, state_dict):
     self.model.load_state_dict(state_dict['model'])
     if self.optimizer is not None:
+      assert 'optimizer' in state_dict, 'Incompatible checkpoint'
       self.optimizer.load_state_dict(state_dict['optimizer'])
 
   def __str__(self):
